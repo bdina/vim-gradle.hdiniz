@@ -1,0 +1,20 @@
+def errorListener = {
+    // Regex pattern to match scala compiler error and warning messages
+    def match = it =~ /\[(?:(E)rror|(W)arning)\]\s+([^:]+):(\d+):(\d+):(.+)/
+    if (match.size() > 0) {
+        // Log to vim temp file
+        vimLog("scalac quickfix: $it")
+        def severity = match[0][1] ?: match[0][2]
+        // Populate vim quickfix (severity, file, line, column, message)
+        vimQuickfix(severity, match[0][3], match[0][4], match[0][5], match[0][6])
+    }
+} as StandardOutputListener
+
+allprojects { project ->
+    project.afterEvaluate {
+        tasks.withType(ScalaCompile).each {
+            // Capture scalac stderr
+            it.logging.addStandardErrorListener(errorListener)
+        }
+    }
+}
