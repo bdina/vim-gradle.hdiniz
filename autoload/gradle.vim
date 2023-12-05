@@ -95,18 +95,17 @@ endfunction
 
 " https://github.com/vim-airline/vim-airline/blob/master/autoload/airline/extensions.vim
 function! s:extension_scripts()
-    let l:scripts =  copy(s:default_vim_gradle_extensions)
+    let l:scripts = copy(s:default_vim_gradle_extensions)
     for l:file in split(globpath(&rtp, 'autoload/gradle/extensions/*.vim'), '\n')
-        if stridx(tolower(resolve(fnamemodify(file, ':p'))), s:script_path) < 0
-            \ && stridx(tolower(fnamemodify(file, ':p')), s:script_path) < 0
-        let l:name = fnamemodify(l:file, ':t:r')
-        try
-            for l:script in gradle#extensions#{l:name}#build_scripts()
-               let l:scripts += ['"'.l:script.'"']
-            endfor
-        catch
-        endtry
-      endif
+        if stridx(tolower(resolve(fnamemodify(l:file, ':p'))), tolower(s:script_path)) >= 0
+            let l:name = fnamemodify(l:file, ':t:r')
+            try
+                for l:script in gradle#extensions#{l:name}#build_scripts()
+                    let l:scripts += ['"'.l:script.'"']
+                endfor
+            catch
+            endtry
+        endif
     endfor
     return "[".join(l:scripts, ',')."]"
 endfunction
